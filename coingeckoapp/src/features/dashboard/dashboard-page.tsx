@@ -299,60 +299,60 @@ function CryptoTable({
             ))}
           </div>
         ) : (
-        <div className="h-96 overflow-x-auto overflow-y-auto">
-          <table className="w-full min-w-230 text-left text-sm">
-            <thead className="border-b border-slate-100 bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400">
-              <tr>
-                <th className="px-5 py-3">#</th>
-                <th className="px-5 py-3">Activo</th>
-                {["Precio", "1h", "24h", "7d", "market cap", "Volumen"].map((label) => (
-                  <th key={label} className="px-5 py-3 text-right whitespace-nowrap">{label}</th>
-                ))}
-                <th className="px-5 py-3">7d</th>
-                <th className="px-5 py-3" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {coins.map((coin) => (
-                <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/60" key={coin.id}>
-                  <td className="px-5 py-4 font-medium text-slate-500 dark:text-slate-400">{coin.marketCapRank}</td>
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-3">
-                      <img alt="" className="h-8 w-8 rounded-full" src={coin.image} />
-                      <div>
-                        <p className="font-medium text-slate-950 dark:text-slate-50">{coin.name}</p>
-                        <p className="text-xs uppercase text-slate-500 dark:text-slate-400">{coin.symbol}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-5 py-4 text-right font-medium">{formatCurrency(coin.currentPrice)}</td>
-                  <td className={`px-5 py-4 text-right ${percentageClass(coin.priceChangePercentage1h)}`}>
-                    {formatPercent(coin.priceChangePercentage1h)}
-                  </td>
-                  <td className={`px-5 py-4 text-right ${percentageClass(coin.priceChangePercentage24h)}`}>
-                    {formatPercent(coin.priceChangePercentage24h)}
-                  </td>
-                  <td className={`px-5 py-4 text-right ${percentageClass(coin.priceChangePercentage7d)}`}>
-                    {formatPercent(coin.priceChangePercentage7d)}
-                  </td>
-                  <td className="px-5 py-4 text-right">{formatCompactCurrency(coin.marketCap)}</td>
-                  <td className="px-5 py-4 text-right">{formatCompactCurrency(coin.totalVolume)}</td>
-                  <td className="px-5 py-4">
-                    <Sparkline
-                      positive={(coin.priceChangePercentage7d ?? coin.priceChangePercentage24h ?? 0) >= 0}
-                      values={coin.sparkline7d}
-                    />
-                  </td>
-                  <td className="px-5 py-4 text-right">
-                    <Button onClick={() => onSelectCoin(coin)} variant="secondary" className="whitespace-nowrap hover:cursor-pointer">
-                      Ver gráfica
-                    </Button>
-                  </td>
+          <div className="h-96 overflow-x-auto overflow-y-auto">
+            <table className="w-full min-w-230 text-left text-sm">
+              <thead className="border-b border-slate-100 bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400">
+                <tr>
+                  <th className="px-5 py-3">#</th>
+                  <th className="px-5 py-3">Activo</th>
+                  {["Precio", "1h", "24h", "7d", "market cap", "Volumen"].map((label) => (
+                    <th key={label} className="px-5 py-3 text-right whitespace-nowrap">{label}</th>
+                  ))}
+                  <th className="px-5 py-3">7d</th>
+                  <th className="px-5 py-3" />
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {coins.map((coin) => (
+                  <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/60" key={coin.id}>
+                    <td className="px-5 py-4 font-medium text-slate-500 dark:text-slate-400">{coin.marketCapRank}</td>
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        <img alt="" className="h-8 w-8 rounded-full" src={coin.image} />
+                        <div>
+                          <p className="font-medium text-slate-950 dark:text-slate-50">{coin.name}</p>
+                          <p className="text-xs uppercase text-slate-500 dark:text-slate-400">{coin.symbol}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-5 py-4 text-right font-medium">{formatCurrency(coin.currentPrice)}</td>
+                    <td className={`px-5 py-4 text-right ${percentageClass(coin.priceChangePercentage1h)}`}>
+                      {formatPercent(coin.priceChangePercentage1h)}
+                    </td>
+                    <td className={`px-5 py-4 text-right ${percentageClass(coin.priceChangePercentage24h)}`}>
+                      {formatPercent(coin.priceChangePercentage24h)}
+                    </td>
+                    <td className={`px-5 py-4 text-right ${percentageClass(coin.priceChangePercentage7d)}`}>
+                      {formatPercent(coin.priceChangePercentage7d)}
+                    </td>
+                    <td className="px-5 py-4 text-right">{formatCompactCurrency(coin.marketCap)}</td>
+                    <td className="px-5 py-4 text-right">{formatCompactCurrency(coin.totalVolume)}</td>
+                    <td className="px-5 py-4">
+                      <Sparkline
+                        positive={(coin.priceChangePercentage7d ?? coin.priceChangePercentage24h ?? 0) >= 0}
+                        values={coin.sparkline7d}
+                      />
+                    </td>
+                    <td className="px-5 py-4 text-right">
+                      <Button onClick={() => onSelectCoin(coin)} variant="secondary" className="whitespace-nowrap hover:cursor-pointer">
+                        Ver gráfica
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </CardContent>
     </Card>
@@ -369,6 +369,8 @@ function CoinDetailChart({ coin }: { coin: CryptoMarketCoin | null; }) {
     queryKey: ['market-chart', coin?.id],
     retry: false,
     staleTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
   if (!coin) {
@@ -465,6 +467,10 @@ export function DashboardPage() {
   const { data, error, isFetching, refetch } = useQuery({
     queryFn: api.dashboard,
     queryKey: ['dashboard'],
+    retry: false,
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
   if (error) {
