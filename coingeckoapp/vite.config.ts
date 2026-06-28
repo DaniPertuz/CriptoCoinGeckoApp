@@ -1,14 +1,10 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
-
-const repositoryName = process.env.GITHUB_REPOSITORY?.split('/')[1]
-const isGitHubPages = process.env.GITHUB_PAGES === 'true'
-const base = isGitHubPages && repositoryName ? `/${repositoryName}/` : '/'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 
 // https://vite.dev/config/
 export default defineConfig({
-  base,
+  base: '/CriptoCoinGeckoApp/',
   plugins: [react(), tailwindcss()],
   build: {
     rollupOptions: {
@@ -21,4 +17,4 @@ export default defineConfig({
       },
     },
   },
-})
+});
