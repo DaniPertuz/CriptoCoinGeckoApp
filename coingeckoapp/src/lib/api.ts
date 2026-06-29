@@ -102,10 +102,16 @@ export const api = {
       auth: false,
     }),
   me: () => request<User>('/auth/me'),
-  dashboard: () => request<DashboardSummary>('/cryptocurrencies/dashboard?limit=10&vsCurrency=usd'),
+  dashboard: () =>
+    request<DashboardSummary>('/cryptocurrencies/dashboard?limit=10&vsCurrency=usd', {
+      auth: false,
+    }),
   marketChart: (id: string, days = 7) =>
     request<CryptoMarketChart>(
       `/cryptocurrencies/${encodeURIComponent(id)}/market-chart?days=${days}&vsCurrency=usd`,
+      {
+        auth: false,
+      },
     ),
   users: () => request<User[]>('/users'),
   createUser: (payload: CreateUserPayload) =>
