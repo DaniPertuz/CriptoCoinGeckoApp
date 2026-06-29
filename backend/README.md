@@ -36,10 +36,12 @@ npm test           # Ejecuta pruebas con node:test y tsx
 - `JWT_SECRET`: secreto largo para firmar tokens JWT.
 - `JWT_EXPIRES_IN`: duracion del token, por ejemplo `1d`.
 - `FIRESTORE_USERS_COLLECTION`: coleccion de usuarios en Firestore.
+- `FIRESTORE_CRYPTO_CACHE_COLLECTION`: coleccion usada para cache persistente de respuestas CoinGecko.
 - `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`: credenciales locales por campos.
 - `FIREBASE_SERVICE_ACCOUNT_BASE64`: alternativa para inyectar el JSON completo en base64.
 - `COINGECKO_API_KEY`: opcional si usas una API key de CoinGecko.
-- `COINGECKO_CACHE_TTL_MS`: cache en memoria para respuestas de CoinGecko. Por defecto `60000`.
+- `COINGECKO_CACHE_TTL_MS`: cache fresco para respuestas de CoinGecko. Por defecto `300000`.
+- `COINGECKO_STALE_TTL_MS`: tiempo maximo para usar cache vencido como fallback si CoinGecko limita o falla. Por defecto `21600000`.
 
 ## Endpoints
 
@@ -77,7 +79,7 @@ El frontend puede empezar consumiendo `GET /api/cryptocurrencies/dashboard`, que
 
 Para graficas detalladas por moneda, usa `GET /api/cryptocurrencies/:id/market-chart`, que devuelve series de precio, market cap y volumen.
 
-Las respuestas de CoinGecko usan cache en memoria por URL para reducir errores `429`. Si CoinGecko limita temporalmente las peticiones y existe una respuesta previa en cache, el backend devuelve esa respuesta anterior como fallback.
+Las respuestas de CoinGecko usan cache en memoria y cache persistente en Firestore por URL para reducir errores `429`. Si CoinGecko limita temporalmente las peticiones y existe una respuesta previa en cache, el backend devuelve esa respuesta anterior como fallback.
 
 ## Pruebas
 

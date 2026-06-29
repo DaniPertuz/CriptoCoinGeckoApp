@@ -1,4 +1,5 @@
 import env from '../config/env';
+import * as cryptoCacheRepository from '../repositories/crypto-cache.repository';
 import type {
   CoinGeckoGlobalResponse,
   CoinGeckoMarketChartResponse,
@@ -41,7 +42,16 @@ const getCachedResponse = <TResponse>(cacheKey: string): TResponse | null => {
 
 const getStaleResponse = <TResponse>(cacheKey: string): TResponse | null => {
   const entry = responseCache.get(cacheKey);
-  return entry ? (entry.data as TResponse) : null;
+
+  if (!entry) {
+    return null;
+  }
+
+  if (env.coingecko.staleTtlMs && Date.now() > entry.cachedAt + env.coingecko.staleTtlMs) {
+    return null;
+  }
+
+  return entry.data as TResponse;
 };
 
 const setCachedResponse = <TResponse>(cacheKey: string, data: TResponse): void => {
@@ -56,6 +66,69 @@ const setCachedResponse = <TResponse>(cacheKey: string, data: TResponse): void =
     cachedAt: now,
     expiresAt: now + env.coingecko.cacheTtlMs,
   });
+};
+
+const readPersistedCache = async <TResponse>(cacheKey: string): Promise<cryptoCacheRepository.CryptoCacheEntry<TResponse> | null> => {
+  try {
+    return await cryptoCacheRepository.findByKey<TResponse>(cacheKey);
+  } catch (error) {
+    if (env.nodeEnv !== 'test') {
+      console.warn('Crypto cache read failed', error);
+    }
+
+    return null;
+  }
+};
+
+const getPersistedFreshResponse = async <TResponse>(cacheKey: string): Promise<TResponse | null> => {
+  if (!env.coingecko.cacheTtlMs) {
+    return null;
+  }
+
+  const entry = await readPersistedCache<TResponse>(cacheKey);
+
+  if (!entry || Date.now() > entry.expiresAt) {
+    return null;
+  }
+
+  setCachedResponse(cacheKey, entry.data);
+  return entry.data;
+};
+
+const getPersistedStaleResponse = async <TResponse>(cacheKey: string): Promise<TResponse | null> => {
+  const entry = await readPersistedCache<TResponse>(cacheKey);
+
+  if (!entry) {
+    return null;
+  }
+
+  if (env.coingecko.staleTtlMs && Date.now() > entry.cachedAt + env.coingecko.staleTtlMs) {
+    return null;
+  }
+
+  return entry.data;
+};
+
+const persistCachedResponse = async <TResponse>(cacheKey: string, data: TResponse): Promise<void> => {
+  if (!env.coingecko.cacheTtlMs) {
+    return;
+  }
+
+  const now = Date.now();
+
+  try {
+    await cryptoCacheRepository.save({
+      cacheKey,
+      url: cacheKey,
+      data,
+      cachedAt: now,
+      expiresAt: now + env.coingecko.cacheTtlMs,
+    });
+  } catch (error) {
+    if (env.nodeEnv !== 'test') {
+      console.warn('Crypto cache write failed', error);
+    }
+  }
 };
 
 const getCoinGeckoHeaders = (): Record<string, string> => {
@@ -88,6 +161,12 @@ const requestCoinGecko = async <TResponse>(url: URL): Promise<TResponse> => {
   const timeout = setTimeout(() => controller.abort(), env.coingecko.timeoutMs);
 
   const request = (async () => {
+    const persistedCachedResponse = await getPersistedFreshResponse<TResponse>(cacheKey);
+
+    if (persistedCachedResponse) {
+      return persistedCachedResponse;
+    }
+
     const response = await fetch(url, {
       headers: getCoinGeckoHeaders(),
       signal: controller.signal,
@@ -97,7 +176,7 @@ const requestCoinGecko = async <TResponse>(url: URL): Promise<TResponse> => {
       if (response.status === 429) {
         throw new AppError(
           'CoinGecko rate limit exceeded',
-          429,
+          503,
           'COINGECKO_RATE_LIMITED',
           { status: response.status },
         );
@@ -113,6 +192,7 @@ const requestCoinGecko = async <TResponse>(url: URL): Promise<TResponse> => {
 
     const data = (await response.json()) as TResponse;
     setCachedResponse(cacheKey, data);
+    await persistCachedResponse(cacheKey, data);
     return data;
   })();
 
@@ -125,6 +205,13 @@ const requestCoinGecko = async <TResponse>(url: URL): Promise<TResponse> => {
 
     if (staleResponse) {
       return staleResponse;
+    }
+
+    const persistedStaleResponse = await getPersistedStaleResponse<TResponse>(cacheKey);
+
+    if (persistedStaleResponse) {
+      setCachedResponse(cacheKey, persistedStaleResponse);
+      return persistedStaleResponse;
     }
 
     if (error instanceof Error && error.name === 'AbortError') {

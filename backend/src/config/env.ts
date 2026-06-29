@@ -19,11 +19,13 @@ const envSchema = z.object({
     .optional()
     .transform((value) => (value ? value.replace(/\\n/g, '\n') : value)),
   FIREBASE_SERVICE_ACCOUNT_BASE64: z.string().optional(),
+  FIRESTORE_CRYPTO_CACHE_COLLECTION: z.string().min(1).default('crypto_cache'),
   COINGECKO_API_URL: z.string().url().default('https://api.coingecko.com/api/v3'),
   COINGECKO_API_KEY: z.string().optional(),
   COINGECKO_API_KEY_HEADER: z.string().default('x-cg-demo-api-key'),
   COINGECKO_TIMEOUT_MS: z.coerce.number().int().positive().default(8000),
-  COINGECKO_CACHE_TTL_MS: z.coerce.number().int().min(0).default(60000),
+  COINGECKO_CACHE_TTL_MS: z.coerce.number().int().min(0).default(300000),
+  COINGECKO_STALE_TTL_MS: z.coerce.number().int().min(0).default(21600000),
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -56,6 +58,7 @@ const config = {
   },
   firestore: {
     usersCollection: env.FIRESTORE_USERS_COLLECTION,
+    cryptoCacheCollection: env.FIRESTORE_CRYPTO_CACHE_COLLECTION,
   },
   firebase: {
     projectId: env.FIREBASE_PROJECT_ID,
@@ -69,6 +72,7 @@ const config = {
     apiKeyHeader: env.COINGECKO_API_KEY_HEADER,
     timeoutMs: env.COINGECKO_TIMEOUT_MS,
     cacheTtlMs: env.COINGECKO_CACHE_TTL_MS,
+    staleTtlMs: env.COINGECKO_STALE_TTL_MS,
   },
 };
 

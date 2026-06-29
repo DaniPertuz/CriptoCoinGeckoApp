@@ -38,7 +38,9 @@ El repositorio de usuarios es la unica capa que conoce Firestore. Los servicios 
 
 ## CoinGecko
 
-La integracion vive en `crypto.service.ts` porque actualmente no persiste datos. El servicio transforma la respuesta externa a contratos estables para el frontend y maneja timeouts/errores externos con codigos propios.
+La integracion vive en `crypto.service.ts`. El servicio transforma la respuesta externa a contratos estables para el frontend y maneja timeouts/errores externos con codigos propios.
+
+Para reducir limites `429`, las respuestas externas se guardan en cache de memoria y en Firestore. El cache de memoria cubre llamadas repetidas dentro de la misma instancia; Firestore permite reutilizar la ultima respuesta valida entre cold starts o multiples instancias de Cloud Run.
 
 La API propia expone:
 
